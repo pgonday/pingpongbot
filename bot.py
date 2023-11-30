@@ -77,13 +77,24 @@ class Bot:
 
     def recover_pending_pong_txs(self, pending_pong_txs):
         logger.info('Recovering: pending pong txs')
+        data = None
         for tx in pending_pong_txs:
-            logger.info(tx.hash)
-            # TODO
-            # Update starting_block, nonce
+            logger.info(f'Recovering: pending pong tx {tx.hash.hex()}')
+            self.pending_pong_tx = tx['hash'].hex()
+            data = tx['input']
+            self.pending_pong_data = '0x' + data[10:]
+            self.nonce = tx['nonce'] + 1
+
+        ping_tx = self.w3.eth.get_transaction(self.pending_pong_data)
+        block_number = ping_tx['blockNumber']
+        self.starting_block = block_number + 1
+
+        past_pong_txs = self.get_past_pong_txs()
+        past_pong_txs.append({ 'input': data })
+        self.get_missing_ping_txs_at_block(block_number, past_pong_txs)
 
 
-    def get_ping_txs_at_block(self, block_number):
+    def get_missing_ping_txs_at_block(self, block_number, pong_txs):
         # There can be several ping txs in one block
         ping_txs = []
         block = self.w3.eth.get_block(block_number, True)
@@ -91,16 +102,6 @@ class Bot:
             if tx.to == self.contract_address and tx['from'] != self.sending_address:
                 ping_txs.append(self.w3.eth.get_transaction(tx.hash.hex()))
         
-        return ping_txs
-
-
-    def recover_from_last_pong(self, pong_txs):
-        logger.info('Recovering: from latest pong txs')
-        
-        call_data = pong_txs[-1].input[10:]
-        tx = self.w3.eth.get_transaction(call_data)        
-        ping_txs = self. get_ping_txs_at_block(tx.blockNumber)
-
         pong_datas = ['0x' + item['input'][10:] for item in pong_txs]
         ping_hashs = [item['hash'].hex() for item in ping_txs]
         missing_ping_hashs = [h for h in ping_hashs if h not in pong_datas]
@@ -110,24 +111,29 @@ class Bot:
                 self.send_pong_call(hash)
         else:
             logger.info('Recovering: no missing ping hash')
+
+
+    def recover_from_last_pong(self, pong_txs):
+        logger.info('Recovering: from latest pong txs')
+        
+        call_data = pong_txs[-1].input[10:]
+        tx = self.w3.eth.get_transaction(call_data)        
+        self.get_missing_ping_txs_at_block(tx.blockNumber, pong_txs)
         
         self.starting_block = tx.blockNumber + 1
         logger.info(f'Recovering: starting block set to {self.starting_block}')            
 
 
     def get_pending_pong_txs(self):
-        return None # TODO Infura issue eth_newPendingTransactionFilter is not supported
-
-        logger.info('Recovering: get pending txs')
-        filter = self.w3.eth.filter('pending')
-        pending_entries = filter.get_all_entries()
+        logger.info(f'Recovering: get pending pong txs')
         pending_txs = []
-        for entry in pending_entries:
-            tx = self.w3.eth.get_transaction(entry)
-            if tx['from'] == self.sending_address and tx['to'] == self.contract_address:
-                logger.info(f'Recovering: pending tx found {tx.hash.hex()}')
-                pending_txs.append(tx)
-        
+        # Infura and most providers don't support eth_newPendingTransactionFilter
+        pending_block = self.w3.eth.get_block('pending', True)
+        if pending_block and 'transactions' in pending_block:
+            for tx in pending_block['transactions']:
+                if tx['from'] == self.sending_address and tx['to'] == self.contract_address:
+                    pending_txs.append(tx)
+
         return pending_txs
 
 
@@ -147,7 +153,7 @@ class Bot:
         # Do we have pending txs ?
         pending_pong_txs = self.get_pending_pong_txs()
         if pending_pong_txs:
-            self.recover_pending_txs(pending_pong_txs)
+            self.recover_pending_pong_txs(pending_pong_txs)
         else:
             # If no pending tx, check our latest pong txs
             pong_txs = self.get_past_pong_txs()        
@@ -186,9 +192,9 @@ class Bot:
                     logger.error(receipt)
                     sys.exit(1)
             else:
-                logger.info('[PENDING]')
+                logger.info('[PENDING] <no receipt>')
         except: # TransactionNotFound
-            logger.info('[PENDING]')
+            logger.info('[PENDING] <exception>')
 
 
     def consume_pong_queue(self):
