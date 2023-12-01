@@ -14,8 +14,8 @@ load_dotenv()
 
 logger = logging.getLogger('Bot')
 logger.setLevel(logging.INFO)
-logger.addHandler(logging.FileHandler('bot.log'))
-logger.addHandler(logging.StreamHandler(sys.stdout))
+logger.addHandler(logging.FileHandler('/home/ubuntu/pingpongbot/bot.log'))
+#logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
 class Bot:
@@ -31,7 +31,7 @@ class Bot:
 
         # Init web3 values
         self.w3 = Web3(MultiProvider(providers))
-        with open('abis/pingpong.abi', 'r') as f:
+        with open('/home/ubuntu/pingpongbot/abis/pingpong.abi', 'r') as f:
             contract_abi = json.load(f)
         self.contract = self.w3.eth.contract(address=self.contract_address, abi=contract_abi)
 
@@ -42,11 +42,6 @@ class Bot:
         self.queue = queue.Queue()
         self.pending_pong_tx = None
         self.pending_pong_data = None
-    
-           
-    def load_abi(self, filename):
-        with open('abis/' + filename + '.abi', 'r') as f:
-            return json.load(f)
 
 
     def send_pong_call(self, data):
