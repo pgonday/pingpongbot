@@ -2,9 +2,9 @@
 
 My JS/TS skills still need improvement, so for greater efficiency I made the script in Python.
 
-To avoid rate limitation or provider issues, I'm using the [Lido Finance Web3 Multi Provider](https://github.com/lidofinance/web3py-multi-http-provider), which will switch between provider on errors or network issues.
-The tx nonce is managed using a queue, so we have only one tx after another.
-The bot is deployed on an AWS instance, as a service, and restart on error.
+- To avoid rate limitation or provider issues, I'm using the [Lido Finance Web3 Multi Provider](https://github.com/lidofinance/web3py-multi-http-provider), which will switch between provider on errors or network issues.
+- The tx nonce is managed using a queue, so we have only one tx after another.
+- The bot is deployed on an AWS instance, as a service, and restart on error.
 
 
 The first actions of the bot are the recovery:
@@ -17,9 +17,13 @@ We can also imagine some alerts, which trigger for example when the account bala
 
 # Install & run
 
+For testing:
 ```
 pip install -r requirements.txt
 py bot.py
 ```
 
-On AWS the bot is installed as a service.
+On AWS the bot is installed as a service:
+```
+sudo systemctl [start|stop|restart|status] bot.service
+```
