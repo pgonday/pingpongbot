@@ -12,8 +12,10 @@ from web3_multi_provider import MultiProvider
 
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('Bot')
+logger.setLevel(logging.INFO)
+logger.addHandler(logging.FileHandler('bot.log'))
+logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
 class Bot:
@@ -192,9 +194,9 @@ class Bot:
                     logger.error(receipt)
                     sys.exit(1)
             else:
-                logger.info('[PENDING] <no receipt>')
+                logger.info('[PENDING]')
         except: # TransactionNotFound
-            logger.info('[PENDING] <exception>')
+            logger.info('[PENDING]')
 
 
     def consume_pong_queue(self):
