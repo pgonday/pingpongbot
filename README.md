@@ -2,7 +2,7 @@
 
 My JS/TS skills still need improvement, so for greater efficiency I made the script in Python.
 
-To avoid rate limitation or provider issues, I'm using the [https://github.com/lidofinance/web3py-multi-http-provider](Lido Finance Web3 Multi Provider), which will switch between provider on errors or network issues.
+To avoid rate limitation or provider issues, I'm using the [Lido Finance Web3 Multi Provider](https://github.com/lidofinance/web3py-multi-http-provider), which will switch between provider on errors or network issues.
 The tx nonce is managed using a queue, so we have only one tx after another.
 The bot is deployed on an AWS instance, as a service, and restart on error.
 
@@ -14,3 +14,12 @@ The first actions of the bot are the recovery:
 - then start listening after this block
 
 We can also imagine some alerts, which trigger for example when the account balance is low in ETH.
+
+# Install & run
+
+```
+pip install -r requirements.txt
+py bot.py
+```
+
+On AWS the bot is installed as a service.

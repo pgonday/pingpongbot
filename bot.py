@@ -84,7 +84,7 @@ class Bot:
             logger.info(f'Recovering: pending pong tx {tx.hash.hex()}')
             self.pending_pong_tx = tx['hash'].hex()
             data = tx['input']
-            self.pending_pong_data = '0x' + data[10:]
+            self.pending_pong_data = '0x' + data.hex()[10:]
             self.nonce = tx['nonce'] + 1
 
         ping_tx = self.w3.eth.get_transaction(self.pending_pong_data)
@@ -104,7 +104,7 @@ class Bot:
             if tx.to == self.contract_address and tx['from'] != self.sending_address:
                 ping_txs.append(self.w3.eth.get_transaction(tx.hash.hex()))
         
-        pong_datas = ['0x' + item['input'][10:] for item in pong_txs]
+        pong_datas = ['0x' + item['input'].hex()[10:] for item in pong_txs]
         ping_hashs = [item['hash'].hex() for item in ping_txs]
         missing_ping_hashs = [h for h in ping_hashs if h not in pong_datas]
         if missing_ping_hashs:
@@ -118,7 +118,7 @@ class Bot:
     def recover_from_last_pong(self, pong_txs):
         logger.info('Recovering: from latest pong txs')
         
-        call_data = pong_txs[-1].input[10:]
+        call_data = pong_txs[-1].input.hex()[10:]
         tx = self.w3.eth.get_transaction(call_data)        
         self.get_missing_ping_txs_at_block(tx.blockNumber, pong_txs)
         
