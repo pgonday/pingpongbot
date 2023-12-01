@@ -17,6 +17,8 @@ We can also imagine some alerts, which trigger for example when the account bala
 
 # Install & run
 
+Copy the `.env.template` to `.env` and complete the values.
+
 For testing:
 ```
 pip install -r requirements.txt
