@@ -17,23 +17,23 @@ contract = w3.eth.contract(address=os.environ.get('CONTRACT_ADDRESS'), abi=contr
 pings = queue.Queue()
 pongs = queue.Queue()
 
-print('Get Ping events')
+print('Get Ping events', end='', flush=True)
 filter = contract.events.Ping.create_filter(fromBlock=starting_block)
 for event in filter.get_all_entries():
-    print('.', end='')
+    print('.', end='', flush=True)
     pings.put(event['transactionHash'].hex())
     
-print('\nGet Pong events')
+print('\nGet Pong events', end='', flush=True)
 filter = contract.events.Pong.create_filter(fromBlock=starting_block)
 for event in filter.get_all_entries():
-    print('.', end='')
+    print('.', end='', flush=True)
     hash = event['transactionHash']
     tx = w3.eth.get_transaction(hash)
     pongs.put('0x' + tx['input'].hex()[10:])
 
-print('\nChecking')
+print('\nChecking', end='')
 for ping in list(pings.queue):
-    print('.', end='')
+    print('.', end='', flush=True)
     pong = pongs.get()
     if ping != pong:
         print(ping, pong)
