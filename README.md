@@ -2,6 +2,11 @@
 
 My JS/TS skills still need improvement, so for greater efficiency I made the script in Python.
 
+The bot is listening from block 10144091.
+
+The Pong sentd address is 0xeDB3Ad1A948BcF5Ff6229b39d1F689d0dDD33F2b
+
+
 - To avoid rate limitation or provider issues, I'm using the [Lido Finance Web3 Multi Provider](https://github.com/lidofinance/web3py-multi-http-provider), which will switch between provider on errors or network issues.
 - The tx nonce is managed using a queue, so we have only one tx after another.
 - The bot is deployed on an AWS instance, as a service, and restart on error.
